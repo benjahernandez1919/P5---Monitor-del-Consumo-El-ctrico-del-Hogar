@@ -1,0 +1,487 @@
+[
+  {
+    "id": "e5e0000000000001",
+    "type": "tab",
+    "label": "E07 · mi nodo",
+    "disabled": false,
+    "info": "Flujo GT6 del equipo E07, proyecto P5 (nodo esp32).\nFalta solo elegir la conexion al broker en los dos nodos MQTT."
+  },
+  {
+    "id": "e5e0000000000002",
+    "type": "comment",
+    "z": "e5e0000000000001",
+    "name": "E07 · P5 · esp32. FALTA: elegir el broker en 'datos de mi nodo' y en '/cmd QoS 1'",
+    "info": "",
+    "x": 330,
+    "y": 40,
+    "wires": []
+  },
+  {
+    "id": "e5e0000000000010",
+    "type": "mqtt in",
+    "z": "e5e0000000000001",
+    "name": "datos de mi nodo",
+    "topic": "curso/E07/P5/esp32",
+    "qos": "0",
+    "datatype": "auto-detect",
+    "broker": "",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 150,
+    "y": 100,
+    "wires": [
+      [
+        "e5e0000000000011"
+      ]
+    ]
+  },
+  {
+    "id": "e5e0000000000011",
+    "type": "json",
+    "z": "e5e0000000000001",
+    "name": "a objeto",
+    "property": "payload",
+    "action": "obj",
+    "pretty": false,
+    "x": 340,
+    "y": 100,
+    "wires": [
+      [
+        "e5e0000000000012",
+        "e5e0000000000020"
+      ]
+    ]
+  },
+  {
+    "id": "e5e0000000000012",
+    "type": "debug",
+    "z": "e5e0000000000001",
+    "name": "datos",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": true,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "payload.estado",
+    "statusType": "msg",
+    "x": 520,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "e5e0000000000020",
+    "type": "function",
+    "z": "e5e0000000000001",
+    "name": "preparar interfaz",
+    "func": "// Prepara la interfaz a partir del JSON que publica SU nodo.\n// COMPLETAR: el campo principal y los estados, en el MISMO orden que el enum de su sketch.\nconst CAMPO   = \"corriente\";  // corriente de la carga en mA (INA219)\nconst ESTADOS = [\"MEDICION\", \"CONSUMO_ALTO\", \"ERROR_SEGURO\", \"ACTUANDO_REMOTO\"];  // mismo orden que el enum SystemState\n\nconst p = msg.payload;\nlet medidor = null, serie = null, estado = null;\nif (typeof p[CAMPO] === \"number\") {\n    medidor = { payload: p[CAMPO] };\n    serie   = { topic: CAMPO, payload: p[CAMPO] };\n}\nif (typeof p.estado === \"number\") {\n    estado = { payload: (ESTADOS[p.estado] || (\"estado \" + p.estado)) + (p.sensor_ok === 0 ? \" · sensor con falla\" : \"\") };\n}\nreturn [medidor, serie, estado];",
+    "outputs": 3,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 540,
+    "y": 140,
+    "wires": [
+      [
+        "e5e0000000000021"
+      ],
+      [
+        "e5e0000000000022"
+      ],
+      [
+        "e5e0000000000023"
+      ]
+    ]
+  },
+  {
+    "name": "",
+    "order": 1,
+    "value": "payload",
+    "valueType": "msg",
+    "width": 4,
+    "height": 3,
+    "gtype": "gauge-half",
+    "gstyle": "needle",
+    "title": "Corriente de la carga",
+    "alwaysShowTitle": false,
+    "floatingTitlePosition": "top-left",
+    "units": "mA",
+    "icon": "",
+    "prefix": "",
+    "suffix": "",
+    "segments": [
+      {
+        "color": "#5CD65C",
+        "from": 0
+      },
+      {
+        "color": "#FFC800",
+        "from": 3.5
+      },
+      {
+        "color": "#EA5353",
+        "from": 6.5
+      }
+    ],
+    "min": 0,
+    "max": 100,
+    "sizeThickness": 16,
+    "sizeGap": 4,
+    "sizeKeyThickness": 8,
+    "styleRounded": true,
+    "styleGlow": false,
+    "className": "",
+    "id": "e5e0000000000021",
+    "type": "ui-gauge",
+    "z": "e5e0000000000001",
+    "group": "e5e00000000000a1",
+    "x": 760,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "name": "",
+    "label": "Corriente, últimos 30 minutos",
+    "order": 1,
+    "chartType": "line",
+    "category": "topic",
+    "categoryType": "msg",
+    "xAxisLabel": "Hora",
+    "xAxisProperty": null,
+    "xAxisPropertyType": "timestamp",
+    "xAxisType": "time",
+    "xAxisFormat": "",
+    "xAxisFormatType": "auto",
+    "xmin": "",
+    "xmax": "",
+    "yAxisLabel": "Corriente (mA)",
+    "yAxisProperty": "payload",
+    "yAxisPropertyType": "msg",
+    "ymin": "0",
+    "ymax": "",
+    "bins": 10,
+    "action": "append",
+    "stackSeries": false,
+    "pointShape": "circle",
+    "pointRadius": 2,
+    "showLegend": true,
+    "removeOlder": 30,
+    "removeOlderUnit": "60",
+    "removeOlderPoints": "",
+    "colors": [
+      "#0095FF",
+      "#FF0000",
+      "#FF7F0E",
+      "#2CA02C",
+      "#A347E1",
+      "#D62728",
+      "#FF9896",
+      "#9467BD",
+      "#C5B0D5"
+    ],
+    "textColor": [
+      "#666666"
+    ],
+    "textColorDefault": true,
+    "gridColor": [
+      "#e5e5e5"
+    ],
+    "gridColorDefault": true,
+    "width": 8,
+    "height": 5,
+    "className": "",
+    "interpolation": "linear",
+    "id": "e5e0000000000022",
+    "type": "ui-chart",
+    "z": "e5e0000000000001",
+    "group": "e5e00000000000a2",
+    "x": 760,
+    "y": 140,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "order": 2,
+    "width": 4,
+    "height": 1,
+    "name": "",
+    "label": "Estado de la FSM",
+    "format": "{{msg.payload}}",
+    "layout": "row-spread",
+    "style": false,
+    "font": "Helvetica",
+    "fontSize": 18,
+    "color": "#717171",
+    "wrapText": false,
+    "className": "",
+    "value": "payload",
+    "valueType": "msg",
+    "id": "e5e0000000000023",
+    "type": "ui-text",
+    "z": "e5e0000000000001",
+    "group": "e5e00000000000a1",
+    "x": 760,
+    "y": 180,
+    "wires": []
+  },
+  {
+    "name": "",
+    "label": "ON",
+    "order": 1,
+    "width": 2,
+    "height": 1,
+    "emulateClick": false,
+    "tooltip": "",
+    "color": "",
+    "bgcolor": "",
+    "className": "",
+    "icon": "",
+    "iconPosition": "left",
+    "payload": "ON",
+    "payloadType": "str",
+    "topic": "topic",
+    "topicType": "msg",
+    "buttonColor": "#2E8B57",
+    "textColor": "",
+    "iconColor": "",
+    "enableClick": true,
+    "enablePointerdown": false,
+    "pointerdownPayload": "",
+    "pointerdownPayloadType": "str",
+    "enablePointerup": false,
+    "pointerupPayload": "",
+    "pointerupPayloadType": "str",
+    "id": "e5e0000000000030",
+    "type": "ui-button",
+    "z": "e5e0000000000001",
+    "group": "e5e00000000000a3",
+    "x": 130,
+    "y": 240,
+    "wires": [
+      [
+        "e5e0000000000032"
+      ]
+    ]
+  },
+  {
+    "name": "",
+    "label": "OFF",
+    "order": 2,
+    "width": 2,
+    "height": 1,
+    "emulateClick": false,
+    "tooltip": "",
+    "color": "",
+    "bgcolor": "",
+    "className": "",
+    "icon": "",
+    "iconPosition": "left",
+    "payload": "OFF",
+    "payloadType": "str",
+    "topic": "topic",
+    "topicType": "msg",
+    "buttonColor": "#7F7F7F",
+    "textColor": "",
+    "iconColor": "",
+    "enableClick": true,
+    "enablePointerdown": false,
+    "pointerdownPayload": "",
+    "pointerdownPayloadType": "str",
+    "enablePointerup": false,
+    "pointerupPayload": "",
+    "pointerupPayloadType": "str",
+    "id": "e5e0000000000031",
+    "type": "ui-button",
+    "z": "e5e0000000000001",
+    "group": "e5e00000000000a3",
+    "x": 130,
+    "y": 280,
+    "wires": [
+      [
+        "e5e0000000000032"
+      ]
+    ]
+  },
+  {
+    "id": "e5e0000000000032",
+    "type": "function",
+    "z": "e5e0000000000001",
+    "name": "armar comando",
+    "func": "// Nodo function: construir el comando (item A5)\nconst accion = msg.payload;        // \"ON\" u \"OFF\"\nif (accion !== \"ON\" && accion !== \"OFF\") {\n    return null;                   // otro valor: se descarta\n}\nmsg.payload = { cmd: accion };     // mqtt out lo serializa\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 320,
+    "y": 260,
+    "wires": [
+      [
+        "e5e0000000000033",
+        "e5e0000000000034"
+      ]
+    ]
+  },
+  {
+    "id": "e5e0000000000033",
+    "type": "mqtt out",
+    "z": "e5e0000000000001",
+    "name": "/cmd QoS 1",
+    "topic": "curso/E07/P5/esp32/cmd",
+    "qos": "1",
+    "retain": "false",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "",
+    "x": 520,
+    "y": 240,
+    "wires": []
+  },
+  {
+    "id": "e5e0000000000034",
+    "type": "debug",
+    "z": "e5e0000000000001",
+    "name": "comando enviado",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 540,
+    "y": 290,
+    "wires": []
+  },
+  {
+    "name": "Panel del equipo",
+    "path": "/dashboard",
+    "appIcon": "",
+    "includeClientData": true,
+    "acceptsClientConfig": [
+      "ui-notification",
+      "ui-control"
+    ],
+    "showPathInSidebar": false,
+    "headerContent": "page",
+    "navigationStyle": "default",
+    "titleBarStyle": "default",
+    "showReconnectNotification": true,
+    "notificationDisplayTime": 1,
+    "showDisconnectNotification": true,
+    "allowInstall": false,
+    "id": "e5e00000000000b0",
+    "type": "ui-base"
+  },
+  {
+    "name": "Tema UA",
+    "colors": {
+      "surface": "#c8102e",
+      "primary": "#c8102e",
+      "bgPage": "#f4f4f4",
+      "groupBg": "#ffffff",
+      "groupOutline": "#d9d9e0"
+    },
+    "sizes": {
+      "density": "default",
+      "pagePadding": "12px",
+      "groupGap": "12px",
+      "groupBorderRadius": "4px",
+      "widgetGap": "12px"
+    },
+    "id": "e5e00000000000b1",
+    "type": "ui-theme"
+  },
+  {
+    "name": "Mi nodo",
+    "ui": "e5e00000000000b0",
+    "path": "/mi-nodo",
+    "icon": "chip",
+    "layout": "grid",
+    "theme": "e5e00000000000b1",
+    "breakpoints": [
+      {
+        "name": "Default",
+        "px": 0,
+        "cols": 3
+      },
+      {
+        "name": "Tablet",
+        "px": 576,
+        "cols": 6
+      },
+      {
+        "name": "Small Desktop",
+        "px": 768,
+        "cols": 9
+      },
+      {
+        "name": "Desktop",
+        "px": 1024,
+        "cols": 12
+      }
+    ],
+    "tabs": [],
+    "order": 1,
+    "className": "",
+    "visible": "true",
+    "disabled": "false",
+    "id": "e5e00000000000b2",
+    "type": "ui-page"
+  },
+  {
+    "name": "Ahora",
+    "width": 4,
+    "height": 1,
+    "order": 1,
+    "showTitle": true,
+    "className": "",
+    "visible": true,
+    "disabled": false,
+    "groupType": "default",
+    "tab": "",
+    "id": "e5e00000000000a1",
+    "type": "ui-group",
+    "page": "e5e00000000000b2"
+  },
+  {
+    "name": "Historial",
+    "width": 8,
+    "height": 1,
+    "order": 2,
+    "showTitle": true,
+    "className": "",
+    "visible": true,
+    "disabled": false,
+    "groupType": "default",
+    "tab": "",
+    "id": "e5e00000000000a2",
+    "type": "ui-group",
+    "page": "e5e00000000000b2"
+  },
+  {
+    "name": "Comando al nodo",
+    "width": 4,
+    "height": 1,
+    "order": 3,
+    "showTitle": true,
+    "className": "",
+    "visible": true,
+    "disabled": false,
+    "groupType": "default",
+    "tab": "",
+    "id": "e5e00000000000a3",
+    "type": "ui-group",
+    "page": "e5e00000000000b2"
+  }
+]

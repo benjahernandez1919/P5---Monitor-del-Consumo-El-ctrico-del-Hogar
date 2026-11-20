@@ -1,0 +1,20 @@
+stateDiagram-v2
+    direction LR
+    [*] --> MEDICION
+
+    MEDICION --> CONSUMO_ALTO: corriente > 6,5 mA (3 lecturas)
+    CONSUMO_ALTO --> MEDICION: corriente < 3,5 mA (3 lecturas)
+
+    MEDICION --> ACTUANDO_REMOTO: cmd ON
+    ACTUANDO_REMOTO --> MEDICION: cmd OFF o 60 s sin comandos
+    ACTUANDO_REMOTO --> CONSUMO_ALTO: corriente > 6,5 mA (prioridad local)
+
+    MEDICION --> ERROR_SEGURO: falla el sensor
+    CONSUMO_ALTO --> ERROR_SEGURO: falla el sensor
+    ACTUANDO_REMOTO --> ERROR_SEGURO: falla el sensor
+    ERROR_SEGURO --> MEDICION: botón de rearme y sensor OK
+
+    note right of MEDICION: verde fijo, rojo apagado
+    note right of CONSUMO_ALTO: verde apagado, rojo encendido
+    note right of ACTUANDO_REMOTO: verde parpadea
+    note right of ERROR_SEGURO: rojo fijo, espera el botón
